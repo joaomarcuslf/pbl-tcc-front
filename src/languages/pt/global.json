@@ -1,6 +1,7 @@
 {
   "GLOBAL": {
     "COMPANIES": "Empresas",
+    "ACCOUNT_SECTION": "Conta",
     "CREATED_AT": "Criado em",
     "DATE_FORMAT": "DD/MM/YYYY",
     "DATE_MASK": "##/##/####",
@@ -36,6 +37,10 @@
     "ADD_EVENT": "Criar eventos",
     "FINISH_EVENT": "Finalizar evento",
     "ENTER_EVENT": "Entrar no evento",
+    "EXPAND_EVENT": "Abrir evento",
+    "QUIT_EVENT": "Sair do evento",
+    "FINISH_GROUP": "Enviar pelo grupo",
+    "ADD_COMMENT": "Adicionar comentário",
     "USER_IN": "Você já está inscrito",
     "START_EVENT": "Iniciar evento",
     "PROFILE_USER": "Ver perfil",

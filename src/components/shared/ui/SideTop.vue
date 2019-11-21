@@ -1,10 +1,28 @@
 <template>
-  <v-toolbar class="menu" color="gray darken-2" fixed dark app>
+  <v-toolbar class="menu" color="blue darken-3" fixed dark app>
     <v-toolbar-title class="ml-0 pl-3 hidden-md-and-up">
       <v-toolbar-side-icon
         @click.stop="handleDrawerToggle"
       ></v-toolbar-side-icon>
     </v-toolbar-title>
+
+    <h1
+      class="display-1 pa-2"
+      style="color:#fafafa; width: 300px; display: flex; justify-content: center;"
+    >
+      JuntaAe
+    </h1>
+
+    <v-select
+      v-model="search"
+      :items="areas"
+      append-outer-icon="search"
+      hide-details
+      dark
+      label="Busque eventos por área"
+      class="search-field"
+      @change="selectArea"
+    ></v-select>
 
     <v-list class="horizontal-list pa-1 hidden-sm-and-down">
       <v-list-tile
@@ -30,7 +48,10 @@
   </v-toolbar>
 </template>
 <script>
+import ApiClientMixin from "@/mixins/ApiClientMixin";
+
 export default {
+  mixins: [ApiClientMixin],
   props: {
     items: {
       type: Array,
@@ -39,15 +60,29 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      areas: [],
+      search: "",
+    };
+  },
+  mounted() {
+    this.apiClient.get(`areas`).then(resp => {
+      this.areas = resp.data;
+    });
+  },
   methods: {
     handleDrawerToggle() {
       window.getApp.$emit("APP_DRAWER_TOGGLED");
+    },
+    selectArea() {
+      this.$router.push(`events/area/${this.search}`);
     },
   },
 };
 </script>
 
-<style scoped>
+<style>
 .menu {
   padding-left: 0px !important;
 }
@@ -55,7 +90,7 @@ export default {
 .horizontal-list {
   display: flex;
   flex: 1;
-  justify-content: space-evenly;
+  justify-content: flex-end;
   background: transparent !important;
 }
 
@@ -74,10 +109,22 @@ export default {
   align-items: center;
   display: flex;
 }
-</style>
 
-<style>
 .horizontal-list.v-list div a.v-list__tile--link.theme--dark:hover {
   background: rgba(245, 245, 245, 0.15) !important;
+}
+
+.horizontal-list .v-list__tile--active {
+  color: rgba(255, 255, 255, 0.7) !important;
+  caret-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.search-field {
+  flex: 9;
+}
+
+.search-field .primary--text {
+  color: #fafafa !important;
+  caret-color: #fafafa !important;
 }
 </style>

@@ -151,7 +151,7 @@ export default {
 .dropbox {
   outline: 2px dashed grey; /* the dash box */
   outline-offset: -10px;
-  background: lightcyan;
+  background: rgba(224, 255, 255, 0.5);
   color: dimgray;
   padding: 10px 10px;
   min-height: 200px; /* minimum height */
@@ -171,7 +171,12 @@ export default {
 }
 
 .dropbox:not(.sent):hover {
-  background: lightblue; /* when mouse over to the drop zone, change color */
+  background: rgba(
+    224,
+    255,
+    255,
+    0.8
+  ); /* when mouse over to the drop zone, change color */
 }
 
 .dropbox.sent {
@@ -210,17 +215,17 @@ export default {
   flex-wrap: wrap;
 }
 
-.dropbox a:hover {
-  height: 210px;
-  width: 160px;
+.dropbox a:hover .box {
+  height: 100px;
+  width: 100px;
   transition: height 0.25s ease-in;
   transition: width 0.25s ease-in;
 }
 
 .dropbox .box {
   background: rgba(250, 0, 0, 0.7);
-  height: 150px;
-  width: 150px;
+  height: 95px;
+  width: 95px;
   display: flex;
   align-content: center;
   align-items: center;
@@ -243,7 +248,7 @@ export default {
 .dropbox .box .format {
   font-weight: bold;
   color: white;
-  font-size: 4rem;
+  font-size: 3rem;
   text-decoration: none;
   text-transform: uppercase;
 }

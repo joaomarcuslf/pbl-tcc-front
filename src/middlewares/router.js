@@ -61,7 +61,7 @@ const router = new Router({
             {
               path: "/users/:username/show",
               name: "UserShow",
-              component: Empty,
+              component: () => import("@/components/pages/users/Show"),
             },
             {
               path: "/users/:username/edit",

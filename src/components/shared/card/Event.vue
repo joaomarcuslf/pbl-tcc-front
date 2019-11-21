@@ -1,17 +1,47 @@
 <template>
   <v-card style="background: rgba(200, 200, 200, .25)">
     <v-card-text>
-      <div class="pa-1" v-if="event.inscriptions">
-        <strong style="display:flex">{{
-          $t("EVENTS.LABEL.INSCRIPTIONS")
-        }}</strong>
-        <span style="display:flex">
-          {{ event.inscriptions.length }}
-          <v-icon size="20">
-            person outline
-          </v-icon>
-        </span>
-      </div>
+      <v-layout row wrap>
+        <div class="pa-2" v-if="event.inscriptions">
+          <strong style="display:flex">{{
+            $t("EVENTS.LABEL.INSCRIPTIONS")
+          }}</strong>
+          <span style="display:flex">
+            <v-icon size="25" class="pa-1">
+              person
+            </v-icon>
+            <span class="headline pa-1">
+              {{ event.inscriptions.length }}
+            </span>
+          </span>
+        </div>
+
+        <div class="pa-2" v-if="event.end_date">
+          <strong style="display:flex">{{
+            $t("EVENTS.LABEL.END_DATE")
+          }}</strong>
+          <span style="display:flex">
+            <v-icon size="25" class="pa-1">
+              today
+            </v-icon>
+            <span class="headline pa-1">
+              {{ event.end_date }}
+            </span>
+          </span>
+        </div>
+
+        <div class="pa-2" v-if="event.groups">
+          <strong style="display:flex">{{ $t("EVENTS.LABEL.GROUPS") }}</strong>
+          <span style="display:flex">
+            <v-icon size="25" class="pa-1">
+              group
+            </v-icon>
+            <span class="headline pa-1">
+              {{ event.groups.length }}
+            </span>
+          </span>
+        </div>
+      </v-layout>
 
       <div v-if="event.description" class="justify-end pa-1">
         <label class="display-2" style="display:flex">{{
@@ -29,7 +59,22 @@
         <file-upload v-model="event.file" :blockNew="true" />
       </div>
 
-      <v-layout row wrap justify-end v-if="canShow(['admin', 'manager'])">
+      <v-layout v-if="showExpand">
+        <v-flex pa-1>
+          <div class="headline pa-1 justify-end" style="display:flex">
+            <v-btn dark large color="blue" @click="openEvent(event)">
+              {{ $t("GLOBAL.EXPAND_EVENT") }}
+            </v-btn>
+          </div>
+        </v-flex>
+      </v-layout>
+
+      <v-layout
+        row
+        wrap
+        justify-end
+        v-if="canShow(['admin', 'manager']) && !showExpand"
+      >
         <v-btn
           dark
           large
@@ -56,19 +101,6 @@
         >
           {{ $t("GLOBAL.START_EVENT") }}
         </v-btn>
-
-        <v-btn
-          dark
-          large
-          color="warning"
-          v-if="
-            event.status === 'started' &&
-              (canShow(['admin']) || isOwner(event.user_id))
-          "
-          @click="finishEvent(event)"
-        >
-          {{ $t("GLOBAL.FINISH_EVENT") }}
-        </v-btn>
       </v-layout>
 
       <!-- Audit area -->
@@ -76,7 +108,11 @@
       <v-layout
         wrap
         column
-        v-if="canShow(['admin', 'manager']) && event.status === 'audit'"
+        v-if="
+          canShow(['admin', 'manager']) &&
+            event.status === 'audit' &&
+            !showExpand
+        "
       >
         <v-flex>
           <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
@@ -233,28 +269,237 @@
         </v-flex>
       </v-layout>
 
-      <v-layout row wrap justify-end v-if="canShow(['user'])">
-        <v-btn
-          dark
-          large
-          color="warning"
-          v-if="
-            event.status === 'waiting' && canShow(['user']) && !userIn(event)
-          "
-          @click="enterEvent(event)"
-        >
-          {{ $t("GLOBAL.ENTER_EVENT") }}
-        </v-btn>
+      <!-- Finish area -->
 
-        <v-btn
-          dark
-          large
-          color="red"
-          v-else-if="userIn(event)"
-          @click="quitEvent(event)"
+      <v-layout
+        wrap
+        column
+        v-if="
+          canShow(['admin', 'manager']) &&
+            event.status === 'started' &&
+            event.groups &&
+            event.groups.length > 0 &&
+            !showExpand
+        "
+      >
+        <v-flex>
+          <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+        </v-flex>
+
+        <v-flex pa-1>
+          <label class="headline pa-1" style="display:flex">{{
+            $t("EVENTS.LABEL.GROUPS_INFO")
+          }}</label>
+        </v-flex>
+
+        <v-flex pl-5 pr-5>
+          <v-layout row wrap>
+            <v-flex
+              pa-2
+              xs12
+              sm6
+              md4
+              v-for="(group, index) in event.groups"
+              v-bind:key="group.id"
+            >
+              <h1 class="display-1">
+                Grupo {{ index + 1 }} - {{ group.rate }}
+              </h1>
+
+              <p
+                v-for="inscription in group.inscriptions"
+                v-bind:key="inscription.id"
+                class="headline pl-2"
+                style="margin-left: 15px"
+              >
+                {{ inscription.user.name || inscription.user.username }}
+              </p>
+
+              <file-upload
+                v-if="group.file"
+                v-model="group.file"
+                :blockNew="true"
+              />
+            </v-flex>
+          </v-layout>
+        </v-flex>
+
+        <v-flex pa-1>
+          <div class="headline pa-1 justify-end" style="display:flex">
+            <v-btn
+              dark
+              large
+              color="warning"
+              v-if="
+                event.status === 'started' &&
+                  (canShow(['admin']) || isOwner(event.user_id))
+              "
+              @click="finishEvent(event)"
+            >
+              {{ $t("GLOBAL.FINISH_EVENT") }}
+            </v-btn>
+          </div>
+        </v-flex>
+      </v-layout>
+
+      <!-- Review area -->
+
+      <v-layout
+        wrap
+        column
+        v-if="
+          canShow(['admin', 'manager']) &&
+            event.status === 'review' &&
+            event.groups &&
+            event.groups.length > 0 &&
+            !showExpand
+        "
+      >
+        <v-flex>
+          <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+        </v-flex>
+
+        <v-flex pa-1>
+          <label class="headline pa-1" style="display:flex">{{
+            $t("EVENTS.LABEL.GROUPS_INFO")
+          }}</label>
+        </v-flex>
+
+        <v-flex pl-5 pr-5>
+          <v-layout row wrap>
+            <v-flex
+              pa-2
+              xs12
+              v-for="(group, index) in event.groups"
+              v-bind:key="group.id"
+            >
+              <h1 class="display-1">
+                Grupo {{ index + 1 }} - {{ group.rate }}
+              </h1>
+
+              <p
+                v-for="inscription in group.inscriptions"
+                v-bind:key="inscription.id"
+                class="headline pl-2"
+                style="margin-left: 15px"
+              >
+                {{ inscription.user.name || inscription.user.username }}
+              </p>
+
+              <file-upload
+                v-if="group.file"
+                v-model="group.file"
+                :blockNew="true"
+              />
+            </v-flex>
+          </v-layout>
+        </v-flex>
+
+        <v-flex pa-1>
+          <div class="headline pa-1 justify-end" style="display:flex">
+            <v-btn
+              dark
+              large
+              color="warning"
+              v-if="
+                event.status === 'started' &&
+                  (canShow(['admin']) || isOwner(event.user_id))
+              "
+              @click="finishEvent(event)"
+            >
+              {{ $t("GLOBAL.FINISH_EVENT") }}
+            </v-btn>
+          </div>
+        </v-flex>
+      </v-layout>
+
+      <v-layout row wrap justify-end v-if="canShow(['user']) && !showExpand">
+        <div v-if="event.status === 'waiting'" class="justify-end">
+          <v-btn
+            dark
+            large
+            color="warning"
+            v-if="
+              event.status === 'waiting' && canShow(['user']) && !userIn(event)
+            "
+            @click="enterEvent(event)"
+          >
+            {{ $t("GLOBAL.ENTER_EVENT") }}
+          </v-btn>
+
+          <v-btn
+            dark
+            large
+            color="red"
+            v-else-if="userIn(event)"
+            @click="quitEvent(event)"
+          >
+            {{ $t("GLOBAL.QUIT_EVENT") }}
+          </v-btn>
+        </div>
+
+        <v-layout
+          column
+          wrap
+          v-if="event.status === 'started' && userIn(event)"
         >
-          {{ $t("GLOBAL.QUIT_EVENT") }}
-        </v-btn>
+          <v-flex>
+            <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+          </v-flex>
+
+          <v-flex>
+            <v-expansion-panel multiple>
+              <v-expansion-panel-content>
+                <template v-slot:header>
+                  <h1 class="display-1">
+                    Seu grupo
+                  </h1>
+                </template>
+
+                <v-flex pl-5 pr-5>
+                  <p
+                    v-for="inscription in group.inscriptions"
+                    v-bind:key="inscription.id"
+                    class="headline pl-2"
+                    style="margin-left: 15px"
+                  >
+                    <a :href="`/users/${inscription.user.username}/show`">
+                      {{ inscription.user.name || inscription.user.username }} -
+                      {{ inscription.user.rate }}
+                    </a>
+                  </p>
+
+                  <label class="headline pa-1" style="display:flex">{{
+                    $t("EVENTS.LABEL.GROUP_FILE_INFO")
+                  }}</label>
+
+                  <file-upload
+                    v-if="!isClosed"
+                    v-model="group.file"
+                    :blockNew="isClosed"
+                  />
+                  <div v-if="isClosed && !group.file">
+                    <strong style="color: red">
+                      O evento já foi fechado!
+                    </strong>
+                  </div>
+
+                  <div class="headline pa-1 justify-end" style="display:flex">
+                    <v-btn
+                      dark
+                      large
+                      color="green"
+                      :disabled="!group.file"
+                      @click="finishGroup(group)"
+                    >
+                      {{ $t("GLOBAL.FINISH_GROUP") }}
+                    </v-btn>
+                  </div>
+                </v-flex>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-flex>
+        </v-layout>
       </v-layout>
     </v-card-text>
   </v-card>
@@ -269,7 +514,7 @@ import moment from "moment";
 
 export default {
   mixins: [ApiClientMixin, ValidationMixin],
-  props: ["event", "refreshFn"],
+  props: ["event", "refreshFn", "showExpand"],
   components: {
     FileUpload,
   },
@@ -280,9 +525,11 @@ export default {
         .format("YYYY-MM-DD"),
       paramsReady: false,
       ruleShowAll: false,
+      isClosed: false,
       color: Material,
       auditArray: [],
       requisites: [],
+      group: {},
       requisiteNew: {
         name: "",
         description: "",
@@ -302,6 +549,32 @@ export default {
         if (this.requisites.length === 0) {
           this.getRequisites();
         }
+
+        if (this.userIn(this.event) && this.event.groups) {
+          const user = this.getUser();
+
+          this.group = this.event.groups.reduce(
+            (acc, nxt) => {
+              if (acc.isEmpty) {
+                const userIn = nxt.inscriptions.some(inscription => {
+                  return inscription.user.id === user.id;
+                });
+
+                return userIn ? nxt : acc;
+              }
+
+              return acc;
+            },
+            { isEmpty: true }
+          );
+        }
+
+        if (this.event.end_date) {
+          const endDate = moment(this.event.end_date).startOf("day");
+          const now = moment().startOf("day");
+
+          this.isClosed = endDate.isBefore(now);
+        }
       },
     },
   },
@@ -309,6 +582,9 @@ export default {
     this.getRequisites();
   },
   methods: {
+    openEvent: function(event) {
+      this.$router.push(`/events/${event.id}`);
+    },
     getRequisites: function() {
       this.apiClient.get(`requisites/`).then(resp => {
         this.requisites = resp;
@@ -328,9 +604,13 @@ export default {
     userIn: function(event) {
       const user = this.getUser();
 
-      return event.inscriptions.some(i => {
-        return i.user_id === user.id;
-      });
+      return (
+        event &&
+        event.inscriptions &&
+        event.inscriptions.some(i => {
+          return i.user_id === user.id;
+        })
+      );
     },
     deleteEvent: function(event) {
       if (confirm("Tem certeza que deseja remover?")) {
@@ -364,12 +644,32 @@ export default {
         this.apiClient
           .put(
             `events/${event.id}`,
-            Object.assign({}, event, { active: false })
+            Object.assign({}, event, { status: "review" })
           )
           .then(this.refreshFn);
       }
     },
-    quitEvent: function() {
+    closeEvent: function(event) {
+      if (confirm("Tem certeza que deseja terminar?")) {
+        this.apiClient
+          .put(
+            `events/${event.id}`,
+            Object.assign({}, event, { active: false, status: "close" })
+          )
+          .then(this.refreshFn);
+      }
+    },
+    finishGroup: function(group) {
+      if (confirm("Tem certeza que o envio está correto?")) {
+        this.apiClient
+          .put(
+            `groups/${group.id}`,
+            Object.assign({}, group, { sent: moment().format("YYYY-MM-DD") })
+          )
+          .then(this.refreshFn);
+      }
+    },
+    quitEvent: function(event) {
       const user = this.getUser();
 
       const inscription = event.inscriptions.find(i => {
@@ -391,7 +691,11 @@ export default {
         this.apiClient
           .put(
             `events/${event.id}`,
-            Object.assign({}, event, { endDate: event.endDate }),
+            Object.assign({}, event, {
+              endDate: moment(this.date)
+                .add(1, "week")
+                .format("YYYY-MM-DD"),
+            }),
             false,
             false,
             false

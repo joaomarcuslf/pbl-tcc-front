@@ -30,14 +30,14 @@ class UserService {
     return currentUser;
   }
 
-  static async getData() {
+  static async getData(username) {
     let fullResponse = {};
     const user = UserService.getCurrentUser();
 
     return new Promise(resolve =>
       Promise.all([
-        Client.get(`users/${user.username}`),
-        Client.get(`areas/${user.username}`),
+        Client.get(`users/${username || user.username}`),
+        Client.get(`areas/${username || user.username}`),
       ]).then(([resp, areas]) => {
         fullResponse = resp;
         fullResponse.rate = fullResponse.rate || 1200;

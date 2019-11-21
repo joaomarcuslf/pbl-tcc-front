@@ -116,7 +116,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .setting-fab {
   top: 50% !important;
   right: 0;
