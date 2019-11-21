@@ -78,7 +78,7 @@
             {{ $t("EVENTS.FORM.CANCEL") }}
           </v-btn>
 
-          <v-btn dark large color="black" type="submit">
+          <v-btn dark large color="blue" type="submit">
             {{ $t("EVENTS.FORM.SUBMIT") }}
           </v-btn>
         </v-layout>

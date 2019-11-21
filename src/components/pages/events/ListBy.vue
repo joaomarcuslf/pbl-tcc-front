@@ -31,7 +31,11 @@
                     <event-top :event="event" :navigateFn="navigateToArea" />
                   </template>
 
-                  <event-card :event="event" :refreshFn="search" />
+                  <event-card
+                    :event="event"
+                    :refreshFn="search"
+                    :showExpand="true"
+                  />
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-flex>

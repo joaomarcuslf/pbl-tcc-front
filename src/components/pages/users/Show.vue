@@ -7,18 +7,8 @@
           <v-layout row wrap>
             <v-flex xs10>
               <p class="display-2 text--primary">
-                {{ $t("USERS.LABEL.PROFILE") }}
+                {{ $t("USERS.LABEL.PROFILE") }}: {{ username }}
               </p>
-            </v-flex>
-            <v-flex xs2>
-              <v-btn
-                class="profile-edit"
-                text
-                dark
-                color="deep-gray accent-4"
-                @click="view = 'edit'"
-                >{{ $t("USERS.LABEL.PROFILE_EDIT") }}</v-btn
-              >
             </v-flex>
           </v-layout>
         </v-card-text>
@@ -29,7 +19,7 @@
           <v-layout row wrap>
             <v-flex xs12>
               <v-layout row wrap>
-                <v-flex md2 sm3 xs12 pa-1>
+                <v-flex sm2 xs12 pa-1>
                   <v-layout row wrap>
                     <v-flex xs12>
                       <v-flex pa-1 sm6>
@@ -57,7 +47,6 @@
                       <linear-statistic
                         title="Notas"
                         :subtitle="`${$t('USERS.LABEL.RATE')}: ${data.rate}`"
-                        icon="list"
                         color="primary"
                         :items="data.grades"
                       />
@@ -65,7 +54,7 @@
                   </v-layout>
                 </v-flex>
 
-                <v-flex md8 sm6 xs12 pa-1>
+                <v-flex sm8 xs12 pa-1>
                   <action-grid
                     title="Desafios em progresso"
                     :headers="dataHeaders"
@@ -85,95 +74,35 @@
                     hide-actions
                   />
                 </v-flex>
-                <v-flex md2 sm3 xs12 pa-1>
-                  <action-grid
-                    title="Desafios abertos"
-                    :headers="dataHeaders"
-                    :data="globalEvents"
-                    hide-headers
-                    hide-actions
-                  />
+
+                <v-flex sm2 xs12 pa-1>
+                  <v-layout row wrap>
+                    <v-flex xs12>
+                      <v-flex pa-1 sm12>
+                        <h3 class="text--primary">
+                          {{ $t("USERS.LABEL.COMMENTS") }}:
+                        </h3>
+                      </v-flex>
+                    </v-flex>
+                    <v-flex x12>
+                      <v-textarea
+                        name="input-7-1"
+                        label="Adicione um comentário"
+                      ></v-textarea>
+
+                      <div class="headline justify-end" style="display:flex">
+                        <v-btn dark large color="green">
+                          {{ $t("GLOBAL.ADD_COMMENT") }}
+                        </v-btn>
+                      </div>
+                    </v-flex>
+                  </v-layout>
                 </v-flex>
               </v-layout>
             </v-flex>
           </v-layout>
         </v-card-text>
       </v-card>
-
-      <v-form
-        id="app"
-        v-if="view === 'edit'"
-        class="form form-wrapper elevation-2"
-        ref="userForm"
-        @submit.prevent="onSubmit"
-      >
-        <v-container fluid>
-          <v-layout column>
-            <v-layout row>
-              <v-flex>
-                <h3 class="title-login title is-3 has-text-right">
-                  {{ $t("USERS.FORM.PROFILE_TITLE") }}
-                </h3>
-              </v-flex>
-            </v-layout>
-
-            <v-flex>
-              <v-text-field
-                :label="$t('USERS.LABEL.NAME')"
-                v-model="data.name"
-                :placeholder="$t('USERS.FORM.NAMEPLACEHOLDER')"
-                name="name"
-                id="name"
-                :rules="[rules.required]"
-              ></v-text-field>
-            </v-flex>
-
-            <v-flex>
-              <v-text-field
-                :label="$t('USERS.LABEL.EMAIL')"
-                v-model="data.email"
-                :placeholder="$t('USERS.FORM.EMAILPLACEHOLDER')"
-                name="email"
-                id="email"
-                :rules="[rules.required, rules.email]"
-              ></v-text-field>
-            </v-flex>
-
-            <v-flex>
-              <v-text-field
-                :label="$t('USERS.LABEL.PASSWORD')"
-                v-model="data.password"
-                :placeholder="$t('USERS.FORM.PASSWORDPLACEHOLDER')"
-                name="password"
-                id="password"
-                type="password"
-              ></v-text-field>
-
-              <v-text-field
-                :label="$t('USERS.LABEL.PASSWORD_DUPLICATE')"
-                v-model="data.password_dupl"
-                :placeholder="$t('USERS.FORM.PASSWORDPLACEHOLDER')"
-                name="password"
-                id="password"
-                type="password"
-                :rules="[
-                  val => val === data.password || $t('GLOBAL_ERROR.PASSWORD'),
-                ]"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
-
-          <v-layout row wrap justify-end>
-            <v-btn dark large color="red" @click="view = 'show'">
-              {{ $t("USERS.FORM.CANCEL") }}
-            </v-btn>
-
-            <v-btn dark large color="blue" type="submit">
-              {{ $t("USERS.FORM.SUBMIT") }}
-            </v-btn>
-          </v-layout>
-        </v-container>
-      </v-form>
     </v-container>
   </div>
 </template>
@@ -218,6 +147,7 @@ export default {
       },
       errors: [],
       view: "show",
+      username: "",
     };
   },
   computed: {
@@ -252,11 +182,11 @@ export default {
     getData: function() {
       const $context = this;
 
-      const user = $context.getUser();
+      this.username = this.$route.params.username;
 
-      if (user.username) {
+      if (this.username) {
         Promise.all([
-          UserService.getData(),
+          UserService.getData(this.username),
           $context.apiClient.get(`events`),
         ]).then(([resp, events]) => {
           $context.data = resp;

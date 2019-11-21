@@ -38,13 +38,7 @@
           </v-layout>
 
           <v-layout row wrap justify-end>
-            <v-btn
-              dark
-              large
-              color="black"
-              type="submit"
-              :loading="loading > 0"
-            >
+            <v-btn dark large color="blue" type="submit" :loading="loading > 0">
               {{ $t("LOGIN.FORM.SUBMIT") }}
             </v-btn>
           </v-layout>
@@ -129,17 +123,17 @@ export default {
   background: -moz-linear-gradient(
     -45deg,
     rgba(250, 250, 250, 1) 55%,
-    rgb(0, 17, 20) 90%
+    rgb(0, 17, 95) 90%
   ); /* FF3.6-15 */
   background: -webkit-linear-gradient(
     -45deg,
     rgba(250, 250, 250, 1) 55%,
-    rgba(0, 17, 20, 1) 90%
+    rgba(0, 17, 95, 1) 90%
   ); /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(
     135deg,
     rgba(250, 250, 250, 1) 55%,
-    rgba(0, 17, 20, 1) 90%
+    rgba(0, 17, 95, 1) 90%
   ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fafafa', endColorstr='#7db9e8',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 }
