@@ -46,7 +46,12 @@ export default {
           text: this.$t("USERS.LABEL.NAME"),
           value: "name",
           customTemplate: item => {
-            return `<a href="/users/${item.username}/show"><strong> ${item.name} </strong></a>`;
+            return `<a href="/users/${
+              item.username
+            }/show"><strong> ${item.username || item.name} </strong></a>`;
+          },
+          click: item => {
+            this.$router.push(`/users/${item.username}/show`);
           },
         },
         { sortable: false, text: this.$t("USERS.LABEL.ROLE"), value: "role" },

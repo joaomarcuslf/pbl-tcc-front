@@ -1,27 +1,19 @@
 <template>
   <v-card>
-    <v-card-title>
-      <div class="layout row ma-0 justify-space-between pa-0">
-        <div>
-          <h4>{{ title }}</h4>
-        </div>
-        <div class="icon">
-          <v-icon mini :color="color">{{ icon }}</v-icon>
-        </div>
-      </div>
-    </v-card-title>
     <v-card-text class="pa-1">
       <div>
         <h5 class="sub-progress">{{ subtitle }}</h5>
       </div>
       <br />
       <div v-for="(item, index) in items" v-bind:key="index">
-        <span class="caption">{{ item.subheading }}</span>
+        <strong>{{ item.subheading }}:</strong>
+
+        {{ item.value }}
 
         <v-progress-linear
-          :value="item.value * 10"
+          :value="item.value"
           height="5"
-          :color="item.value > 5 ? 'green' : 'red'"
+          :color="item.value > 50 ? 'green' : 'red'"
         ></v-progress-linear>
       </div>
     </v-card-text>
