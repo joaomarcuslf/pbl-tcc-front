@@ -39,6 +39,7 @@
     "ENTER_EVENT": "Entrar no evento",
     "EXPAND_EVENT": "Abrir evento",
     "QUIT_EVENT": "Sair do evento",
+    "CLOSE_EVENT": "Finalizar evento",
     "FINISH_GROUP": "Enviar pelo grupo",
     "ADD_COMMENT": "Adicionar comentário",
     "USER_IN": "Você já está inscrito",

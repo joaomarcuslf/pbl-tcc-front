@@ -363,6 +363,10 @@
           <label class="headline pa-1" style="display:flex">{{
             $t("EVENTS.LABEL.GROUPS_INFO")
           }}</label>
+
+          <strong style="color: red; padding-left: 15px"
+            >Avalie os participantes por grupo, ou individualmente</strong
+          >
         </v-flex>
 
         <v-flex pl-5 pr-5>
@@ -372,25 +376,149 @@
               xs12
               v-for="(group, index) in event.groups"
               v-bind:key="group.id"
+              @click="focusGroupReview(group)"
             >
-              <h1 class="display-1">
-                Grupo {{ index + 1 }} - {{ group.rate }}
-              </h1>
-
-              <p
-                v-for="inscription in group.inscriptions"
-                v-bind:key="inscription.id"
-                class="headline pl-2"
-                style="margin-left: 15px"
+              <div
+                v-if="group.reviewed"
+                style="background: white; padding: 5px;"
               >
-                {{ inscription.user.name || inscription.user.username }}
-              </p>
+                <h1 class="display-1">
+                  Grupo {{ index + 1 }} -
+                  {{ group.reviewed ? "Já revisado" : "Não revisado" }},
+                  {{ group.file ? "Possui arquivo" : "Não enviou arquivo" }}
+                </h1>
 
-              <file-upload
-                v-if="group.file"
-                v-model="group.file"
-                :blockNew="true"
-              />
+                <file-upload
+                  v-if="group.file"
+                  v-model="group.file"
+                  :blockNew="true"
+                />
+              </div>
+              <v-expansion-panel multiple v-else>
+                <v-expansion-panel-content>
+                  <template v-slot:header>
+                    <h1 class="display-1">
+                      Grupo {{ index + 1 }} -
+                      {{ group.reviewed ? "Já revisado" : "Não revisado" }},
+                      {{ group.file ? "Possui arquivo" : "Não enviou arquivo" }}
+                    </h1>
+                  </template>
+
+                  <v-flex pl-5 pr-5>
+                    <strong
+                      >Para avaliação individual, desmarque o
+                      participante.</strong
+                    >
+
+                    <div
+                      v-for="inscription in groupReviewed.inscriptions"
+                      v-bind:key="inscription.id"
+                    >
+                      <v-checkbox
+                        v-model="inscription.checked"
+                        :label="
+                          `${inscription.user.name ||
+                            inscription.user.username}`
+                        "
+                      />
+
+                      <v-layout row wrap v-if="!inscription.checked">
+                        <v-flex
+                          xs12
+                          sm6
+                          md4
+                          v-for="item in groupReviewed.requisites"
+                          v-bind:key="item.requisite.id"
+                        >
+                          <percent-slider
+                            :value="
+                              requisitesValue.individual[inscription.id][
+                                item.id
+                              ]
+                            "
+                            label="Avaliação"
+                            @change="
+                              changeRequisiteValue(
+                                $event,
+                                'individual',
+                                item.id,
+                                inscription.id
+                              )
+                            "
+                          />
+
+                          <strong>{{ item.requisite.name }}</strong> <br />
+                          <div style="padding-left: 15px">
+                            {{ item.requisite.description }} <br />
+                            {{ `Peso: ${item.weight}` }} <br />
+                          </div>
+                        </v-flex>
+                      </v-layout>
+                    </div>
+
+                    <file-upload
+                      v-if="groupReviewed.file"
+                      v-model="groupReviewed.file"
+                      :blockNew="true"
+                    />
+
+                    <v-flex>
+                      <hr
+                        style="color: rgba(0, 0, 0, .2); border-radius: 45%"
+                      />
+                    </v-flex>
+
+                    <strong class="headline">Revisão por grupo:</strong>
+
+                    <v-layout row wrap>
+                      <v-flex
+                        xs12
+                        sm6
+                        md4
+                        v-for="item in groupReviewed.requisites"
+                        v-bind:key="item.requisite.id"
+                      >
+                        <percent-slider
+                          :value="requisitesValue.group[item.id]"
+                          label="Avaliação"
+                          @change="
+                            changeRequisiteValue($event, 'group', item.id)
+                          "
+                        />
+
+                        <strong>{{ item.requisite.name }}</strong> <br />
+                        <div style="padding-left: 15px">
+                          {{ item.requisite.description }} <br />
+                          {{ `Peso: ${item.weight}` }} <br />
+                        </div>
+                      </v-flex>
+                    </v-layout>
+
+                    <v-flex>
+                      <hr
+                        style="color: rgba(0, 0, 0, .2); border-radius: 45%"
+                      />
+                    </v-flex>
+
+                    <v-flex pa-1>
+                      <div
+                        class="headline pa-1 justify-end"
+                        style="display:flex"
+                      >
+                        <v-btn
+                          dark
+                          large
+                          color="warning"
+                          v-if="!group.reviewed"
+                          @click="finishReview(group)"
+                        >
+                          Terminar revisão
+                        </v-btn>
+                      </div>
+                    </v-flex>
+                  </v-flex>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
             </v-flex>
           </v-layout>
         </v-flex>
@@ -408,6 +536,23 @@
               @click="finishEvent(event)"
             >
               {{ $t("GLOBAL.FINISH_EVENT") }}
+            </v-btn>
+
+            <v-btn
+              dark
+              large
+              color="warning"
+              v-if="
+                event.status === 'review' &&
+                  event.groups.reduce(
+                    (acc, nxt) => acc && nxt.reviewed,
+                    true
+                  ) &&
+                  (canShow(['admin']) || isOwner(event.user_id))
+              "
+              @click="closeEvent(event)"
+            >
+              {{ $t("GLOBAL.CLOSE_EVENT") }}
             </v-btn>
           </div>
         </v-flex>
@@ -508,6 +653,7 @@
 <script>
 import Material from "vuetify/es5/util/colors";
 import FileUpload from "@/components/shared/input/FileUpload";
+import PercentSlider from "@/components/shared/input/PercentSlider";
 import ApiClientMixin from "@/mixins/ApiClientMixin";
 import ValidationMixin from "@/mixins/ValidationMixin";
 import moment from "moment";
@@ -517,6 +663,7 @@ export default {
   props: ["event", "refreshFn", "showExpand"],
   components: {
     FileUpload,
+    PercentSlider,
   },
   data() {
     return {
@@ -533,6 +680,13 @@ export default {
       requisiteNew: {
         name: "",
         description: "",
+      },
+      groupReviewed: {
+        requisites: [],
+      },
+      requisitesValue: {
+        group: {},
+        individual: {},
       },
     };
   },
@@ -589,6 +743,100 @@ export default {
       this.apiClient.get(`requisites/`).then(resp => {
         this.requisites = resp;
       });
+    },
+    focusGroupReview: function(group) {
+      if (group.id !== this.groupReviewed.id) {
+        this.groupReviewed = group;
+
+        this.groupReviewed.requisites = this.event.requisite_events.map(
+          requisite => {
+            this.requisitesValue.group[requisite.id] = group.file ? 100 : 0;
+
+            return requisite;
+          }
+        );
+
+        this.groupReviewed.inscriptions = group.inscriptions.map(user => {
+          this.requisitesValue.individual[user.id] = Object.assign(
+            {},
+            this.requisitesValue.group
+          );
+
+          return Object.assign({}, user, { checked: true });
+        });
+      }
+    },
+    changeRequisiteValue: function(value, context, index, uId) {
+      const $context = this;
+
+      if (context === "group") {
+        $context.requisitesValue[context][index] = value;
+        return;
+      } else {
+        $context.requisitesValue[context][uId][index] = value;
+        return;
+      }
+    },
+    finishReview: function(group) {
+      if (confirm("Tem certeza que a revisão está correta?")) {
+        this.apiClient
+          .put(
+            `groups/${group.id}`,
+            Object.assign({}, group, { reviewed: true })
+          )
+          .then(() => {
+            let requests = [];
+
+            let usersToUpdate = [];
+
+            this.groupReviewed.inscriptions.map(inscription => {
+              this.groupReviewed.requisites.map(requisite => {
+                if (!inscription.checked) {
+                  requests.push({
+                    user_id: inscription.user.id,
+                    event_id: this.event.id,
+                    requisite_id: requisite.requisite_id,
+                    weight: requisite.weight,
+                    value: this.requisitesValue.individual[inscription.id][
+                      requisite.id
+                    ],
+                  });
+                } else {
+                  requests.push({
+                    user_id: inscription.user.id,
+                    event_id: this.event.id,
+                    requisite_id: requisite.requisite_id,
+                    weight: requisite.weight,
+                    value: this.requisitesValue.group[requisite.id],
+                  });
+                }
+
+                if (usersToUpdate.indexOf(inscription.user.id) === -1) {
+                  usersToUpdate.push(inscription.user.id);
+                }
+              });
+            });
+
+            return Promise.all(
+              requests.map(val =>
+                this.apiClient.post(`reviews`, val, false, false, false)
+              )
+            ).then(() =>
+              Promise.all(
+                usersToUpdate.map(val =>
+                  this.apiClient.post(
+                    `users/${val}/rate/${this.event.id}`,
+                    { rate: group.rate },
+                    false,
+                    false,
+                    false
+                  )
+                )
+              )
+            );
+          })
+          .then(this.refreshFn);
+      }
     },
     addRequisite: function(requisite) {
       if (requisite.name && requisite.description) {

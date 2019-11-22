@@ -42,10 +42,31 @@ class UserService {
         fullResponse = resp;
         fullResponse.rate = fullResponse.rate || 1200;
 
-        fullResponse.grades = Object.keys(areas.data).reduce((acc, nxt) => {
+        fullResponse.areas = areas;
+
+        const grades = resp.reviews.reduce((acc, nxt) => {
+          if (acc[nxt.requisite.name]) {
+            acc[nxt.requisite.name] = {
+              value: acc[nxt.requisite.name].value + nxt.value * nxt.weight,
+              weight: acc[nxt.requisite.name].weight + nxt.weight,
+              id: nxt.requisite.id,
+            };
+          } else {
+            acc[nxt.requisite.name] = {
+              value: nxt.value * nxt.weight,
+              weight: nxt.weight,
+              id: nxt.requisite.id,
+            };
+          }
+
+          return acc;
+        }, {});
+
+        fullResponse.grades = Object.keys(grades).reduce((acc, nxt) => {
           return acc.concat({
             subheading: nxt,
-            value: areas.data[nxt],
+            value: grades[nxt].value / grades[nxt].weight,
+            id: grades[nxt].id,
           });
         }, []);
 
