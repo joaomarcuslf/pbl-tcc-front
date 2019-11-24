@@ -83,6 +83,11 @@ export default {
               text: this.$t("GLOBAL.ADD_EVENT"),
               action: "playlist_add",
             },
+            this.canShow(["admin", "manager", "user"]) && {
+              path: "/ranks",
+              text: this.$t("GLOBAL.LIST_RANKING"),
+              action: "list",
+            },
           ],
         },
 

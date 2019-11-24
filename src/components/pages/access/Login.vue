@@ -101,9 +101,9 @@ export default {
           .login(context.login.email, context.login.password)
           .then(() => {
             if (context.returnUrl && context.returnUrl != "/") {
-              context.$router.push(context.returnUrl);
+              window.location = context.returnUrl;
             } else {
-              context.$router.push("/resume");
+              window.location = "/resume";
             }
           });
       }

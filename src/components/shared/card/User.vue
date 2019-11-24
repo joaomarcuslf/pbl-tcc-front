@@ -65,7 +65,7 @@
                   </v-layout>
                 </v-flex>
 
-                <v-flex sm8 xs12 pa-1>
+                <v-flex sm7 xs12 pa-1>
                   <action-grid
                     title="Desafios em progresso"
                     :headers="dataHeaders"
@@ -86,7 +86,7 @@
                   />
                 </v-flex>
 
-                <v-flex sm2 xs12 pa-1 v-if="!showEdit">
+                <v-flex sm3 xs12 pa-1 v-if="!showEdit">
                   <v-layout row wrap>
                     <v-flex xs12>
                       <v-flex pa-1 sm12>
@@ -120,7 +120,7 @@
                           :rules="[rules.required]"
                         ></v-select>
 
-                        <div class="headline justify-end" style="display:flex">
+                        <div class="justify-end" style="display:flex">
                           <v-btn dark large color="green" type="submit">
                             Adicionar recomendação
                           </v-btn>
@@ -226,6 +226,63 @@
                 </strong>
                 {{ recommendation.requisite.name }}
                 <br />
+              </div>
+            </v-flex>
+          </v-layout>
+        </v-card-text>
+      </v-card>
+
+      <v-card class="mx-auto" v-if="view === 'show'">
+        <v-card-text>
+          <v-layout row wrap>
+            <v-flex xs10>
+              <p class="display-1 text--primary">
+                Histórico de uso
+              </p>
+            </v-flex>
+
+            <v-flex xs12 sm6 pa-1 v-if="userEvents && userEvents.length">
+              <div
+                style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .3)"
+              >
+                <div style="display: flex; align-content: center">
+                  <v-icon large pa-1>events</v-icon>
+
+                  <h1 class="pl-5 display-1">
+                    Esse usuário participou de
+                    {{
+                      `${userEvents.length} ${
+                        userEvents.length > 1 ? "eventos" : "evento"
+                      }`
+                    }}
+                  </h1>
+                </div>
+              </div>
+            </v-flex>
+
+            <v-flex
+              xs12
+              sm6
+              pa-1
+              v-if="userRecomendations && userRecomendations.length"
+            >
+              <div
+                style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .3)"
+              >
+                <div style="display: flex; align-content: center">
+                  <v-icon large pa-1>list</v-icon>
+
+                  <h1 class="pl-5 display-1">
+                    Esse usuário já fez
+                    {{
+                      `${userRecomendations.length} ${
+                        userRecomendations.length > 1
+                          ? "recomendações"
+                          : "recomendação"
+                      }`
+                    }}
+                  </h1>
+                </div>
               </div>
             </v-flex>
           </v-layout>
@@ -355,6 +412,7 @@ export default {
       view: "show",
       user: {},
       recommendation: {},
+      userRecomendations: [],
     };
   },
   computed: {
@@ -392,8 +450,8 @@ export default {
       if (this.username) {
         Promise.all([
           UserService.getData(this.username),
-          // $context.apiClient.get(`events`),
-        ]).then(([resp]) => {
+          $context.apiClient.get(`recommendations/${this.username}`),
+        ]).then(([resp, userRecomendations]) => {
           $context.data = resp;
 
           $context.userEvents = resp.eventsIn;
@@ -401,6 +459,7 @@ export default {
           $context.recommendation = {};
           $context.recommendation.user_id = resp.id;
           $context.recommendation.author = this.user.username;
+          $context.userRecomendations = userRecomendations;
         });
       }
     },

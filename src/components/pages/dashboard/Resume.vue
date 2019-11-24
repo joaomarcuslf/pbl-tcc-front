@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import "vuetify/dist/vuetify.min.css";
 import Material from "vuetify/es5/util/colors";
 
 import ApiClientMixin from "@/mixins/ApiClientMixin";

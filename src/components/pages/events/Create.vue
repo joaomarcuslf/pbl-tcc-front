@@ -49,16 +49,13 @@
 
           <v-flex>
             <v-layout column>
-              <v-text-field
+              <v-textarea
                 :label="$t('EVENTS.LABEL.DESCRIPTION')"
                 v-model="data.description"
                 :placeholder="$t('EVENTS.FORM.DESCRIPTIONPLACEHOLDER')"
                 name="description"
                 id="description"
-                auto-grow
-                clearable
-                counter
-              ></v-text-field>
+              ></v-textarea>
             </v-layout>
           </v-flex>
 
