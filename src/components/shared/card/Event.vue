@@ -25,7 +25,7 @@
               today
             </v-icon>
             <span class="headline pa-1">
-              {{ event.end_date }}
+              {{ event.end_date | date }}
             </span>
           </span>
         </div>
@@ -645,6 +645,87 @@
             </v-expansion-panel>
           </v-flex>
         </v-layout>
+
+        <v-layout column wrap v-if="event.status === 'close' && userIn(event)">
+          <v-flex>
+            <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+          </v-flex>
+
+          <v-flex>
+            <v-expansion-panel multiple>
+              <v-expansion-panel-content>
+                <template v-slot:header>
+                  <h1 class="display-1">
+                    Resultado do seu grupo
+                  </h1>
+                </template>
+
+                <v-flex pl-5 pr-5>
+                  <div
+                    v-for="inscription in group.inscriptions"
+                    v-bind:key="inscription.id"
+                    class="headline pl-2"
+                    style="margin-left: 15px"
+                  >
+                    <a :href="`/users/${inscription.user.username}/show`">
+                      {{ inscription.user.name || inscription.user.username }} -
+                      {{ inscription.user.rate }}
+                    </a>
+
+                    <strong
+                      v-if="inscription.user.id !== user.id"
+                      style="font-size: 16px; padding: 0 5px"
+                    >
+                      Recomende seus companheiros para ganhar pontos extras.
+                    </strong>
+
+                    <v-layout row wrap>
+                      <v-flex
+                        xs12
+                        sm4
+                        v-for="review in groupReviews[inscription.user.id]"
+                        v-bind:key="review.id"
+                      >
+                        <div
+                          style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .3)"
+                        >
+                          <strong style="padding-left: 10px">
+                            Requisito:
+                          </strong>
+                          {{ review.requisite.name }}
+                          <br />
+                          <strong style="padding-left: 10px">
+                            Nota:
+                          </strong>
+                          {{ review.value }}
+                          <br />
+                        </div>
+                      </v-flex>
+                    </v-layout>
+                  </div>
+
+                  <label
+                    v-if="group.file"
+                    class="headline pa-1"
+                    style="display:flex"
+                    >Arquivo enviado</label
+                  >
+
+                  <file-upload
+                    v-if="group.file"
+                    v-model="group.file"
+                    :blockNew="true"
+                  />
+                  <div v-if="isClosed && group.file">
+                    <strong style="color: red">
+                      O evento já foi fechado!
+                    </strong>
+                  </div>
+                </v-flex>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-flex>
+        </v-layout>
       </v-layout>
     </v-card-text>
   </v-card>
@@ -668,6 +749,7 @@ export default {
   data() {
     return {
       date: moment()
+        .add(1, "month")
         .add(1, "day")
         .format("YYYY-MM-DD"),
       paramsReady: false,
@@ -688,6 +770,8 @@ export default {
         group: {},
         individual: {},
       },
+      groupReviews: {},
+      user: {},
     };
   },
   watch: {
@@ -727,13 +811,50 @@ export default {
           const endDate = moment(this.event.end_date).startOf("day");
           const now = moment().startOf("day");
 
-          this.isClosed = endDate.isBefore(now);
+          this.isClosed =
+            endDate.isBefore(now) || this.event.status === "close";
+        }
+      },
+    },
+    group: {
+      deep: true,
+      immediate: true,
+      handler: function() {
+        if (
+          this.event.status === "close" &&
+          this.userIn(this.event) &&
+          Object.keys(this.groupReviews).length === 0
+        ) {
+          Promise.all(
+            this.group.inscriptions.map(i => {
+              return this.apiClient
+                .get(`reviews/event/${this.event.id}/user/${i.user.id}`)
+                .then(resp => {
+                  return {
+                    user: i.user.id,
+                    review: resp,
+                  };
+                });
+            })
+          ).then(resp => {
+            this.groupReviews = resp.reduce((acc, nxt) => {
+              if (!acc[nxt.user]) {
+                acc[nxt.user] = [];
+              }
+
+              acc[nxt.user] = acc[nxt.user].concat(nxt.review);
+
+              return acc;
+            }, {});
+          });
         }
       },
     },
   },
   mounted() {
     this.getRequisites();
+
+    this.user = this.getUser();
   },
   methods: {
     openEvent: function(event) {
@@ -936,13 +1057,13 @@ export default {
           "Tem certeza que deseja iniciar o evento, uma vez começado os dados não podem ser modificados?"
         )
       ) {
+        const endDate = moment(this.date).format("YYYY-MM-DD");
+
         this.apiClient
           .put(
             `events/${event.id}`,
             Object.assign({}, event, {
-              endDate: moment(this.date)
-                .add(1, "week")
-                .format("YYYY-MM-DD"),
+              end_date: endDate,
             }),
             false,
             false,

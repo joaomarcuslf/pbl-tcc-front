@@ -14,6 +14,10 @@ import "@/middlewares/vuetify";
 import LanguagesMixin from "@/mixins/LanguagesMixin";
 import AuthMixin from "@/mixins/AuthMixin";
 
+import dateFilter from "@/filters/date";
+
+Vue.filter("date", dateFilter);
+
 Vue.mixin(LanguagesMixin);
 Vue.mixin(AuthMixin);
 

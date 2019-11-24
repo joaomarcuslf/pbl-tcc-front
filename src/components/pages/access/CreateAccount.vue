@@ -126,16 +126,14 @@ export default {
             context.login.password,
             context.login.username
           )
-          .then(result => {
-            console.log(result);
+          .then(() => {
             context.authService
               .login(context.login.email, context.login.password)
-              .then(user => {
-                console.log(user);
+              .then(() => {
                 if (context.returnUrl && context.returnUrl != "/") {
-                  context.$router.push(context.returnUrl);
+                  window.location = context.returnUrl;
                 } else {
-                  context.$router.push("/resume");
+                  window.location = "/resume";
                 }
               });
           })
