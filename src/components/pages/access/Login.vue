@@ -105,6 +105,10 @@ export default {
             } else {
               window.location = "/resume";
             }
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 300);
           });
       }
     },

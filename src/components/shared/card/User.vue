@@ -16,7 +16,7 @@
                 class="profile-edit"
                 text
                 dark
-                color="deep-gray accent-4"
+                color="blue"
                 @click="view = 'edit'"
                 >{{ $t("USERS.LABEL.PROFILE_EDIT") }}</v-btn
               >
@@ -30,7 +30,7 @@
           <v-layout row wrap>
             <v-flex xs12>
               <v-layout row wrap>
-                <v-flex sm2 xs12 pa-1>
+                <v-flex sm3 xs12 pa-1>
                   <v-layout row wrap>
                     <v-flex xs12>
                       <v-flex pa-1 sm6 v-if="data.name">
@@ -60,33 +60,47 @@
                         :subtitle="`${$t('USERS.LABEL.RATE')}: ${data.rate}`"
                         color="primary"
                         :items="data.grades"
+                        :bordeless="true"
                       />
                     </v-flex>
                   </v-layout>
                 </v-flex>
 
-                <v-flex sm7 xs12 pa-1>
-                  <action-grid
+                <v-flex sm5 xs12 pa-1>
+                  <event-list
                     title="Desafios em progresso"
                     :headers="dataHeaders"
                     :data="activeData"
                     hide-headers
                     hide-actions
+                    align="end"
+                    size="1.6em"
+                    padding="2"
                   />
 
-                  <br />
-                  <br />
+                  <h1
+                    style="color: rgba(255, 0, 0, .8); display: flex; justify-content: center"
+                    v-if="activeData.length === 0"
+                  >
+                    Você não participou de nenhum evento.
+                  </h1>
 
-                  <action-grid
+                  <br v-if="nonActiveData.length !== 0" />
+                  <br v-if="nonActiveData.length !== 0" />
+
+                  <event-list
                     title="Desafios passados"
                     :headers="dataHeaders"
                     :data="nonActiveData"
                     hide-headers
                     hide-actions
+                    align="end"
+                    size="1.6em"
+                    padding="2"
                   />
                 </v-flex>
 
-                <v-flex sm3 xs12 pa-1 v-if="!showEdit">
+                <v-flex sm4 xs12 pa-1 v-if="!showEdit">
                   <v-layout row wrap>
                     <v-flex xs12>
                       <v-flex pa-1 sm12>
@@ -126,6 +140,50 @@
                           </v-btn>
                         </div>
                       </v-form>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+
+                <v-flex sm4 xs12 pa-1 v-else>
+                  <v-layout column wrap>
+                    <v-flex xs12 sm6 pa-1>
+                      <div
+                        style="margin: 5px; padding: 10px; background: rgba(120, 120, 120, .1)"
+                      >
+                        <div style="display: flex; align-content: center">
+                          <v-icon large pa-1>event</v-icon>
+
+                          <h1 class="headline pl-3">
+                            {{
+                              `${
+                                userEvents.length > 1
+                                  ? "Eventos participado:"
+                                  : "Evento participado:"
+                              } ${userEvents.length}`
+                            }}
+                          </h1>
+                        </div>
+                      </div>
+                    </v-flex>
+
+                    <v-flex xs12 sm6 pa-1>
+                      <div
+                        style="margin: 5px; padding: 10px; background: rgba(120, 120, 120, .1)"
+                      >
+                        <div style="display: flex; align-content: center">
+                          <v-icon large pa-1>list</v-icon>
+
+                          <h1 class="headline pl-3">
+                            {{
+                              `${
+                                userRecomendations.length > 1
+                                  ? "Recomendações feitas:"
+                                  : "Recomendação feita:"
+                              } ${userRecomendations.length}`
+                            }}
+                          </h1>
+                        </div>
+                      </div>
                     </v-flex>
                   </v-layout>
                 </v-flex>
@@ -232,7 +290,7 @@
         </v-card-text>
       </v-card>
 
-      <v-card class="mx-auto" v-if="view === 'show'">
+      <v-card class="mx-auto" v-if="view === 'show' && !showEdit">
         <v-card-text>
           <v-layout row wrap>
             <v-flex xs10>
@@ -375,7 +433,7 @@ import ValidationMixin from "@/mixins/ValidationMixin";
 
 import LinearStatistic from "@/components/shared/statistic/LinearStatistic";
 
-import ActionGrid from "@/components/shared/list/ActionGrid";
+import EventList from "@/components/shared/list/Event";
 
 import UserService from "@/services/UserService";
 
@@ -384,7 +442,7 @@ export default {
   mixins: [ApiClientMixin, ValidationMixin],
   components: {
     LinearStatistic,
-    ActionGrid,
+    EventList,
   },
   mounted() {
     this.user = this.getUser();

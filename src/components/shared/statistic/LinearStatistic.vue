@@ -4,7 +4,7 @@
       <div>
         <h5 class="sub-progress">{{ subtitle }}</h5>
       </div>
-      <br />
+      <br v-if="items.length > 0" />
       <div v-for="(item, index) in items" v-bind:key="index">
         <strong>{{ item.subheading }}:</strong>
 
@@ -29,6 +29,7 @@ export default {
     value: Number,
     color: String,
     items: Array,
+    borderless: Boolean,
   },
   computed: {
     caption() {
