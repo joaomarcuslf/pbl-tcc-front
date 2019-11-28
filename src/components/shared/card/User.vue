@@ -128,7 +128,7 @@
                         <v-select
                           label="Tópico recomendado"
                           v-model="recommendation.event_id"
-                          :items="nonActiveData"
+                          :items="userEvents"
                           item-text="name"
                           item-value="id"
                           :rules="[rules.required]"
