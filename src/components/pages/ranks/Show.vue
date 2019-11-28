@@ -84,7 +84,7 @@
                 class="text--primary"
                 style="display: flex; justify-content: center; font-size: 1.5em; flex-wrap: wrap"
               >
-                Se motive também! Participe dos eventos e você pode estar na
+                Impulsione-se também! Participe dos eventos e você pode estar na
                 próxima listagem de rank!
               </strong>
 
