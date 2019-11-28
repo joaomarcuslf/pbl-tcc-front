@@ -108,6 +108,19 @@ const router = new Router({
             },
           ],
         },
+
+        {
+          path: "/ranks",
+          name: "Event",
+          component: Empty,
+          children: [
+            {
+              path: "/ranks",
+              name: "RanksList",
+              component: () => import("@/components/pages/ranks/Show"),
+            },
+          ],
+        },
       ],
     },
     {
