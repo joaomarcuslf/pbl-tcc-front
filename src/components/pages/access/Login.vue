@@ -54,13 +54,13 @@
                 </h6>
               </a>
             </v-flex>
-            <v-flex shrink pa-1>
+            <!-- <v-flex shrink pa-1>
               <a class="button is-text is-small" href="/forgot-password">
                 <h6 class="is-4 password">
                   {{ $t("LOGIN.FORM.FORGOT_PASSWORD_BTN") }}
                 </h6>
               </a>
-            </v-flex>
+            </v-flex> -->
           </v-layout>
         </v-container>
       </v-form>
@@ -105,10 +105,6 @@ export default {
             } else {
               window.location = "/resume";
             }
-
-            setTimeout(() => {
-              window.location.reload();
-            }, 300);
           });
       }
     },
