@@ -100,22 +100,21 @@
                   />
                 </v-flex>
 
-                <v-flex sm4 xs12 pa-1 v-if="!showEdit">
+                <v-flex sm4 xs12 pa-2 v-if="!showEdit">
                   <v-layout row wrap>
-                    <v-flex xs12>
-                      <v-flex pa-1 sm12>
-                        <h3 class="text--primary">
-                          Adicione uma avaliação
-                        </h3>
-                      </v-flex>
-                    </v-flex>
-                    <v-flex x12 v-if="user.username !== username">
+                    <v-flex x12 pa-2 v-if="user.username !== username">
                       <v-form
                         id="app"
                         class="form form-wrapper elevation-2"
                         ref="recommendationForm"
                         @submit.prevent="onRecommendationSubmit"
                       >
+                        <v-flex pa-1 sm12>
+                          <h3 class="text--primary">
+                            Adicione uma avaliação
+                          </h3>
+                        </v-flex>
+
                         <v-select
                           label="Evento que participou"
                           v-model="recommendation.requisite_id"
@@ -123,6 +122,7 @@
                           item-text="subheading"
                           item-value="id"
                           :rules="[rules.required]"
+                          class="pa-2"
                         ></v-select>
 
                         <v-select
@@ -132,6 +132,7 @@
                           item-text="name"
                           item-value="id"
                           :rules="[rules.required]"
+                          class="pa-2"
                         ></v-select>
 
                         <div class="justify-end" style="display:flex">
@@ -518,6 +519,10 @@ export default {
           $context.recommendation.user_id = resp.id;
           $context.recommendation.author = this.user.username;
           $context.userRecomendations = userRecomendations;
+
+          if ($context.$refs && $context.$refs.recommendationForm) {
+            $context.$refs.recommendationForm.reset();
+          }
         });
       }
     },
