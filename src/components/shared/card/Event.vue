@@ -646,7 +646,11 @@
           </v-flex>
         </v-layout>
 
-        <v-layout column wrap v-if="event.status === 'close' && userIn(event)">
+        <v-layout
+          column
+          wrap
+          v-if="(event.status === 'close' && userIn(event)) || group.reviewed"
+        >
           <v-flex>
             <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
           </v-flex>
@@ -716,6 +720,30 @@
                     v-model="group.file"
                     :blockNew="true"
                   />
+
+                  <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+
+                  <label class="headline pa-1" style="display:flex">
+                    Dicas que podem te ajudar
+                  </label>
+
+                  <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+
+                  <div v-for="pill in userPills" v-bind:key="pill.id">
+                    <strong class="headline" style="padding-left: 10px">
+                      {{ pill.title }}
+                    </strong>
+
+                    <p
+                      style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .1)"
+                    >
+                      {{ pill.content }}
+                      <br />
+                    </p>
+
+                    <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
+                  </div>
+
                   <div v-if="isClosed && group.file">
                     <strong style="color: red">
                       O evento já foi fechado!
@@ -772,6 +800,7 @@ export default {
       },
       groupReviews: {},
       user: {},
+      userPills: [],
     };
   },
   watch: {
@@ -821,7 +850,7 @@ export default {
       immediate: true,
       handler: function() {
         if (
-          this.event.status === "close" &&
+          (this.event.status === "close" || this.group.reviewed) &&
           this.userIn(this.event) &&
           Object.keys(this.groupReviews).length === 0
         ) {
@@ -840,6 +869,19 @@ export default {
             this.groupReviews = resp.reduce((acc, nxt) => {
               if (!acc[nxt.user]) {
                 acc[nxt.user] = [];
+              }
+
+              if (nxt.user === this.user.id) {
+                for (let i = 0; i < nxt.review.length; i++) {
+                  let review = nxt.review[i];
+                  let pills = review.requisite.pills;
+                  this.userPills.push(
+                    pills.find(
+                      pill =>
+                        review.value >= pill.min && review.value <= pill.max
+                    )
+                  );
+                }
               }
 
               acc[nxt.user] = acc[nxt.user].concat(nxt.review);

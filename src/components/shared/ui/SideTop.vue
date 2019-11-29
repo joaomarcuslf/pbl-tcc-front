@@ -6,12 +6,18 @@
       ></v-toolbar-side-icon>
     </v-toolbar-title>
 
-    <h1
+    <a
       class="display-1 pa-2"
-      style="color:#fafafa; width: 300px; display: flex; justify-content: center;"
+      style="color:rgb(250, 250, 250);width: 135px;display: flex;justify-content: center;max-height: 100px;"
+      href="/resume"
     >
-      JuntaAe
-    </h1>
+      <img
+        src="@/assets/img/logo.png"
+        class="logo"
+        alt="Logo da aplicação: Junta Ae"
+        style="min-width: 135px"
+      />
+    </a>
 
     <v-select
       v-model="search"
@@ -20,7 +26,7 @@
       hide-details
       dark
       label="Busque eventos por área"
-      class="search-field"
+      class="search-field hidden-sm-and-down"
       @change="selectArea"
     ></v-select>
 
@@ -121,10 +127,16 @@ export default {
 
 .search-field {
   flex: 9;
+  padding-left: 24px;
+  width: 100%;
 }
 
 .search-field .primary--text {
   color: #fafafa !important;
   caret-color: #fafafa !important;
+}
+
+.search-field {
+  height: 100%;
 }
 </style>
