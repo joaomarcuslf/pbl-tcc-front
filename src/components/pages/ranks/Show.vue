@@ -39,6 +39,22 @@
 
                   <strong>Pontuação no rank: {{ data.count }}</strong>
                 </div>
+
+                <div
+                  class="user-list"
+                  v-if="
+                    tab1 === 0
+                      ? rate.length === 0
+                      : mostInscriptions.length === 0
+                  "
+                >
+                  <strong
+                    class="text--primary"
+                    style="display: flex; font-size: 1.2em; flex-wrap: wrap"
+                  >
+                    Ainda não possuímos dados para esse Rank
+                  </strong>
+                </div>
               </v-flex>
 
               <v-flex sm6 pa-2>
@@ -71,6 +87,22 @@
                   </a>
 
                   <strong>Pontuação no rank: {{ data.count }}</strong>
+                </div>
+
+                <div
+                  class="user-list"
+                  v-if="
+                    tab2 === 0
+                      ? mostRecommendations.length === 0
+                      : mostAuthor.length === 0
+                  "
+                >
+                  <strong
+                    class="text--primary"
+                    style="display: flex; font-size: 1.2em; flex-wrap: wrap"
+                  >
+                    Ainda não possuímos dados para esse Rank
+                  </strong>
                 </div>
               </v-flex>
             </v-layout>

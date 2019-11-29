@@ -1,0 +1,18 @@
+.v-chip .v-chip__content {
+  cursor: pointer !important;
+  -ms-flex-pack: justify !important;
+  -webkit-box-pack: justify !important;
+  height: 32px !important;
+  justify-content: space-between !important;
+  max-width: 90px !important;
+  overflow: hidden !important;
+  padding: 0 5px !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  white-space: nowrap !important;
+  z-index: 1 !important;
+}
+
+.chip-wrapper {
+  flex-wrap: wrap;
+}

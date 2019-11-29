@@ -116,17 +116,17 @@
                         </v-flex>
 
                         <v-select
-                          label="Evento que participou"
+                          label="Tópico recomendado"
                           v-model="recommendation.requisite_id"
-                          :items="data.grades"
-                          item-text="subheading"
+                          :items="requisiteList"
+                          item-text="name"
                           item-value="id"
                           :rules="[rules.required]"
                           class="pa-2"
                         ></v-select>
 
                         <v-select
-                          label="Tópico recomendado"
+                          label="Evento que participou"
                           v-model="recommendation.event_id"
                           :items="userEvents"
                           item-text="name"
@@ -151,10 +151,16 @@
                       <div
                         style="margin: 5px; padding: 10px; background: rgba(120, 120, 120, .1)"
                       >
-                        <div style="display: flex; align-content: center">
-                          <v-icon large pa-1>event</v-icon>
+                        <div
+                          style="display: flex; align-content: center;align-items: center;"
+                        >
+                          <img
+                            src="@/assets/img/bdg-event.png"
+                            alt="Medalha por evento"
+                            style="width: 65px"
+                          />
 
-                          <h1 class="headline pl-3">
+                          <h1 class="headline display-1 pl-3">
                             {{
                               `${
                                 userEvents.length > 1
@@ -171,8 +177,14 @@
                       <div
                         style="margin: 5px; padding: 10px; background: rgba(120, 120, 120, .1)"
                       >
-                        <div style="display: flex; align-content: center">
-                          <v-icon large pa-1>list</v-icon>
+                        <div
+                          style="display: flex; align-content: center;align-items: center;"
+                        >
+                          <img
+                            src="@/assets/img/bdg-reco.png"
+                            alt="Medalha por recomendação"
+                            style="width: 75px"
+                          />
 
                           <h1 class="headline pl-3">
                             {{
@@ -304,8 +316,14 @@
               <div
                 style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .3)"
               >
-                <div style="display: flex; align-content: center">
-                  <v-icon large pa-1>events</v-icon>
+                <div
+                  style="display: flex; align-content: center;align-items: center;"
+                >
+                  <img
+                    src="@/assets/img/bdg-event.png"
+                    alt="Medalha por evento"
+                    style="width: 65px"
+                  />
 
                   <h1 class="pl-5 display-1">
                     Esse usuário participou de
@@ -328,8 +346,14 @@
               <div
                 style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .3)"
               >
-                <div style="display: flex; align-content: center">
-                  <v-icon large pa-1>list</v-icon>
+                <div
+                  style="display: flex; align-content: center;align-items: center;"
+                >
+                  <img
+                    src="@/assets/img/bdg-reco.png"
+                    alt="Medalha por recomendação"
+                    style="width: 65px"
+                  />
 
                   <h1 class="pl-5 display-1">
                     Esse usuário já fez
@@ -472,6 +496,7 @@ export default {
       user: {},
       recommendation: {},
       userRecomendations: [],
+      requisiteList: [],
     };
   },
   computed: {
@@ -510,7 +535,8 @@ export default {
         Promise.all([
           UserService.getData(this.username),
           $context.apiClient.get(`recommendations/${this.username}`),
-        ]).then(([resp, userRecomendations]) => {
+          $context.apiClient.get(`requisites`),
+        ]).then(([resp, userRecomendations, requisiteList]) => {
           $context.data = resp;
 
           $context.userEvents = resp.eventsIn;
@@ -519,6 +545,8 @@ export default {
           $context.recommendation.user_id = resp.id;
           $context.recommendation.author = this.user.username;
           $context.userRecomendations = userRecomendations;
+
+          $context.requisiteList = requisiteList;
 
           if ($context.$refs && $context.$refs.recommendationForm) {
             $context.$refs.recommendationForm.reset();
