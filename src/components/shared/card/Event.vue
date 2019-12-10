@@ -734,12 +734,10 @@
                       {{ pill.title }}
                     </strong>
 
-                    <p
+                    <div
                       style="margin: 5px; padding: 10px; background: rgba(200, 200, 200, .1)"
-                    >
-                      {{ pill.content }}
-                      <br />
-                    </p>
+                      v-html="pill.content"
+                    ></div>
 
                     <hr style="color: rgba(0, 0, 0, .2); border-radius: 45%" />
                   </div>
