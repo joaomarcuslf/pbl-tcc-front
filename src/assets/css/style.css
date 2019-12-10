@@ -1,4 +1,4 @@
-.v-chip .v-chip__content {
+.chip-wrapper .v-chip .v-chip__content {
   cursor: pointer !important;
   -ms-flex-pack: justify !important;
   -webkit-box-pack: justify !important;
